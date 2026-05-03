@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+
+# Next.js
+.next/
+out/
+
+# Database (SQLite local)
+prisma/dev.db
+prisma/dev.db-journal
+
+# WhatsApp sessions
+sessions/
+
+# Environment (ne JAMAIS commit les clés API)
+.env
+.env.local
+.env*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build
+dist/
+build/

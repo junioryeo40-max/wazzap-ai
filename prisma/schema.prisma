@@ -1,0 +1,159 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String?
+  googleId     String?  @unique
+  name         String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  agents        Agent[]
+  tokenBalance  TokenBalance?
+  payments      Payment[]
+  transactions  TokenTransaction[]
+}
+
+model Agent {
+  id        String         @id @default(cuid())
+  userId    String
+  name      String
+  tone      String         @default("PROFESSIONAL")
+  objective String         @default("SUPPORT")
+  isActive  Boolean        @default(false)
+  createdAt DateTime       @default(now())
+
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  business  Business?
+  faqs      FAQ[]
+  products  Product[]
+  messages  Message[]
+  orders    Order[]
+  session   WhatsAppSession?
+}
+
+model Business {
+  id           String   @id @default(cuid())
+  agentId      String   @unique
+  name         String
+  description  String?
+  address      String?
+  hours        String?
+  deliveryInfo String?
+  updatedAt    DateTime @updatedAt
+
+  agent        Agent    @relation(fields: [agentId], references: [id], onDelete: Cascade)
+}
+
+model FAQ {
+  id        String   @id @default(cuid())
+  agentId   String
+  question  String
+  answer    String
+  keywords  String   @default("")
+  hitCount  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  agent     Agent    @relation(fields: [agentId], references: [id], onDelete: Cascade)
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  agentId     String
+  name        String
+  description String?
+  price       Float
+  currency    String   @default("XOF")
+  available   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  agent       Agent    @relation(fields: [agentId], references: [id], onDelete: Cascade)
+}
+
+model WhatsAppSession {
+  id          String   @id @default(cuid())
+  agentId     String   @unique
+  phoneNumber String?
+  status      String   @default("DISCONNECTED")
+  lastSeen    DateTime?
+  createdAt   DateTime @default(now())
+
+  agent       Agent    @relation(fields: [agentId], references: [id], onDelete: Cascade)
+}
+
+model Message {
+  id            String   @id @default(cuid())
+  agentId       String
+  customerPhone String
+  customerName  String?
+  direction     String
+  content       String
+  tokensUsed    Int      @default(0)
+  source        String   @default("AI")
+  createdAt     DateTime @default(now())
+
+  agent         Agent    @relation(fields: [agentId], references: [id])
+}
+
+model Order {
+  id              String   @id @default(cuid())
+  agentId         String
+  customerPhone   String
+  customerName    String?
+  deliveryAddress String?
+  items           String
+  totalAmount     Float
+  currency        String   @default("XOF")
+  status          String   @default("PENDING")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  agent           Agent    @relation(fields: [agentId], references: [id])
+}
+
+model TokenBalance {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  balance     Int      @default(0)
+  totalBought Int      @default(0)
+  totalUsed   Int      @default(0)
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model TokenTransaction {
+  id            String   @id @default(cuid())
+  userId        String
+  agentId       String?
+  type          String
+  amount        Int
+  balanceBefore Int
+  balanceAfter  Int
+  description   String?
+  createdAt     DateTime @default(now())
+
+  user          User     @relation(fields: [userId], references: [id])
+}
+
+model Payment {
+  id            String   @id @default(cuid())
+  userId        String
+  waveRef       String?  @unique
+  pack          String
+  amount        Float
+  currency      String   @default("XOF")
+  tokensGranted Int
+  status        String   @default("PENDING")
+  createdAt     DateTime @default(now())
+
+  user          User     @relation(fields: [userId], references: [id])
+}
