@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import OpenAI from 'openai'
+import { GoogleGenerativeAI } from '@google/generative-ai'
 
 export const dynamic = 'force-dynamic'
 
@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
     source = 'FAQ'
     tokensUsed = 0
   } else {
-    // 2. Construire le contexte métier pour GPT
+    // 2. Construire le contexte métier pour Gemini
     const businessName = agent.business?.name || agent.name
     const productsList = agent.products.length > 0
       ? agent.products.map(p => `- ${p.name}: ${p.price.toLocaleString('fr-FR')} ${p.currency}${p.description ? ` (${p.description})` : ''}`).join('\n')
@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
       ? agent.faqs.map(f => `Q: ${f.question}\nR: ${f.answer}`).join('\n\n')
       : 'Aucune FAQ configurée.'
 
-    const systemPrompt = `Tu es l'assistant WhatsApp IA de "${businessName}".
+    const prompt = `Tu es l'assistant WhatsApp IA de "${businessName}".
 Ton rôle: répondre aux clients de manière professionnelle, amicale et concise (max 3 phrases).
 Réponds toujours dans la langue du client.
 
@@ -80,20 +80,14 @@ Règles importantes:
 - Ne jamais inventer des prix ou informations non fournies
 - Si tu ne sais pas, invite le client à contacter directement l'entreprise
 - Sois chaleureux et utilise des emojis avec modération
-- Pour les commandes, demande: produit, adresse, nom complet`
+- Pour les commandes, demande: produit, adresse, nom complet
 
-    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: message }
-      ],
-      max_tokens: 300,
-      temperature: 0.7,
-    })
+Message du client: ${message}`
 
-    response = completion.choices[0]?.message?.content || 'Désolé, je n\'ai pas pu traiter votre demande.'
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
+    const result = await model.generateContent(prompt)
+    response = result.response.text()
     source = 'AI'
     tokensUsed = TOKENS_PER_MESSAGE
   }
