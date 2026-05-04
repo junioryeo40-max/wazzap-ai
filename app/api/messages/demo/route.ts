@@ -3,7 +3,7 @@ import { getCurrentUser } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import OpenAI from 'openai'
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+export const dynamic = 'force-dynamic'
 
 const TOKENS_PER_MESSAGE = 50
 
@@ -82,6 +82,7 @@ Règles importantes:
 - Sois chaleureux et utilise des emojis avec modération
 - Pour les commandes, demande: produit, adresse, nom complet`
 
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
