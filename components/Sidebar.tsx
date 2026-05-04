@@ -27,24 +27,24 @@ export default function Sidebar({ user, balance }: Props) {
   }
 
   return (
-    <aside className="w-64 bg-[#075E54] flex flex-col h-full shrink-0">
+    <aside className="w-64 bg-slate-900 flex flex-col h-full shrink-0">
       {/* Logo */}
       <div className="px-6 py-5 border-b border-white/10">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-[#25D366] rounded-full flex items-center justify-center text-white font-bold text-lg">W</div>
+          <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-lg">C</div>
           <div>
-            <div className="text-white font-bold text-lg leading-none">WazzapAI</div>
-            <div className="text-white/50 text-xs mt-0.5">Tableau de bord</div>
+            <div className="text-white font-bold text-lg leading-none">ChatFlow</div>
+            <div className="text-white/40 text-xs mt-0.5">Tableau de bord</div>
           </div>
         </div>
       </div>
 
       {/* Token balance */}
-      <div className="mx-4 my-4 bg-white/10 rounded-xl px-4 py-3">
-        <div className="text-white/60 text-xs mb-1">Tokens disponibles</div>
+      <div className="mx-4 my-4 bg-white/5 rounded-xl px-4 py-3">
+        <div className="text-white/50 text-xs mb-1">Tokens disponibles</div>
         <div className="text-white text-2xl font-bold">{balance.toLocaleString('fr-FR')}</div>
         {balance < 500 && (
-          <Link href="/dashboard/tokens" className="text-yellow-300 text-xs mt-1 block hover:underline">
+          <Link href="/dashboard/tokens" className="text-amber-400 text-xs mt-1 block hover:underline">
             ⚠️ Solde faible — Recharger
           </Link>
         )}
@@ -60,8 +60,8 @@ export default function Sidebar({ user, balance }: Props) {
               href={href}
               className={`flex items-center gap-3 px-4 py-3 rounded-xl transition text-sm font-medium ${
                 active
-                  ? 'bg-[#25D366] text-white'
-                  : 'text-white/70 hover:bg-white/10 hover:text-white'
+                  ? 'bg-indigo-600 text-white'
+                  : 'text-white/60 hover:bg-white/5 hover:text-white'
               }`}
             >
               <Icon size={18} />
@@ -74,17 +74,17 @@ export default function Sidebar({ user, balance }: Props) {
       {/* User */}
       <div className="p-4 border-t border-white/10">
         <div className="flex items-center gap-3 mb-3">
-          <div className="w-9 h-9 bg-[#25D366] rounded-full flex items-center justify-center text-white font-bold text-sm">
+          <div className="w-9 h-9 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-sm">
             {(user.name || user.email)[0].toUpperCase()}
           </div>
           <div className="flex-1 min-w-0">
             <div className="text-white text-sm font-medium truncate">{user.name || 'Utilisateur'}</div>
-            <div className="text-white/50 text-xs truncate">{user.email}</div>
+            <div className="text-white/40 text-xs truncate">{user.email}</div>
           </div>
         </div>
         <button
           onClick={logout}
-          className="w-full flex items-center gap-2 px-3 py-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition text-sm"
+          className="w-full flex items-center gap-2 px-3 py-2 text-white/50 hover:text-white hover:bg-white/5 rounded-lg transition text-sm"
         >
           <LogOut size={16} />
           Déconnexion

@@ -31,12 +31,12 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#075E54] to-[#128C7E] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-[#25D366] rounded-full flex items-center justify-center text-white text-3xl font-bold mx-auto mb-4">W</div>
+          <div className="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center text-white text-3xl font-bold mx-auto mb-4">C</div>
           <h1 className="text-2xl font-bold text-gray-800">Connexion</h1>
-          <p className="text-gray-500 text-sm mt-1">Bienvenue sur WazzapAI</p>
+          <p className="text-gray-500 text-sm mt-1">Bienvenue sur ChatFlow</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -47,7 +47,7 @@ export default function LoginPage() {
               required
               value={form.email}
               onChange={e => setForm({ ...form, email: e.target.value })}
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#25D366] text-gray-800"
+              className="w-full border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-800"
               placeholder="votre@email.com"
             />
           </div>
@@ -58,7 +58,7 @@ export default function LoginPage() {
               required
               value={form.password}
               onChange={e => setForm({ ...form, password: e.target.value })}
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#25D366] text-gray-800"
+              className="w-full border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-800"
               placeholder="••••••••"
             />
           </div>
@@ -72,7 +72,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#25D366] text-white py-3 rounded-lg font-semibold hover:bg-[#1da851] transition disabled:opacity-60"
+            className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition disabled:opacity-60"
           >
             {loading ? 'Connexion...' : 'Se connecter'}
           </button>
@@ -80,7 +80,7 @@ export default function LoginPage() {
 
         <p className="text-center text-gray-500 text-sm mt-6">
           Pas encore de compte ?{' '}
-          <Link href="/register" className="text-[#25D366] font-medium hover:underline">
+          <Link href="/register" className="text-indigo-600 font-medium hover:underline">
             S&apos;inscrire
           </Link>
         </p>

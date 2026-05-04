@@ -33,10 +33,10 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#075E54] to-[#128C7E] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-[#25D366] rounded-full flex items-center justify-center text-white text-3xl font-bold mx-auto mb-4">W</div>
+          <div className="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center text-white text-3xl font-bold mx-auto mb-4">C</div>
           <h1 className="text-2xl font-bold text-gray-800">Créer un compte</h1>
           <p className="text-gray-500 text-sm mt-1">500 tokens offerts à l&apos;inscription !</p>
         </div>
@@ -49,7 +49,7 @@ export default function RegisterPage() {
               required
               value={form.name}
               onChange={e => setForm({ ...form, name: e.target.value })}
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#25D366] text-gray-800"
+              className="w-full border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-800"
               placeholder="Votre nom"
             />
           </div>
@@ -60,7 +60,7 @@ export default function RegisterPage() {
               required
               value={form.email}
               onChange={e => setForm({ ...form, email: e.target.value })}
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#25D366] text-gray-800"
+              className="w-full border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-800"
               placeholder="votre@email.com"
             />
           </div>
@@ -71,7 +71,7 @@ export default function RegisterPage() {
               required
               value={form.password}
               onChange={e => setForm({ ...form, password: e.target.value })}
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#25D366] text-gray-800"
+              className="w-full border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-800"
               placeholder="Min. 6 caractères"
             />
           </div>
@@ -82,7 +82,7 @@ export default function RegisterPage() {
               required
               value={form.confirm}
               onChange={e => setForm({ ...form, confirm: e.target.value })}
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#25D366] text-gray-800"
+              className="w-full border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-800"
               placeholder="••••••••"
             />
           </div>
@@ -96,7 +96,7 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#25D366] text-white py-3 rounded-lg font-semibold hover:bg-[#1da851] transition disabled:opacity-60"
+            className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition disabled:opacity-60"
           >
             {loading ? 'Création...' : 'Créer mon compte'}
           </button>
@@ -104,7 +104,7 @@ export default function RegisterPage() {
 
         <p className="text-center text-gray-500 text-sm mt-6">
           Déjà un compte ?{' '}
-          <Link href="/login" className="text-[#25D366] font-medium hover:underline">
+          <Link href="/login" className="text-indigo-600 font-medium hover:underline">
             Se connecter
           </Link>
         </p>

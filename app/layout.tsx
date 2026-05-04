@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'WazzapAI — Agent WhatsApp IA pour l\'Afrique',
+  title: 'ChatFlow — Agent WhatsApp IA pour l\'Afrique',
   description: 'Créez votre agent WhatsApp IA en quelques minutes. Service client, vente, FAQ automatisés.',
 }
 

@@ -24,7 +24,7 @@ export default async function DashboardPage() {
 
   const stats = [
     { label: 'Agents créés', value: agents.length, sub: `${activeAgents} actifs`, color: 'bg-blue-500', href: '/dashboard/agents' },
-    { label: 'WhatsApp connectés', value: connectedAgents, sub: `sur ${agents.length} agents`, color: 'bg-[#25D366]', href: '/dashboard/agents' },
+    { label: 'WhatsApp connectés', value: connectedAgents, sub: `sur ${agents.length} agents`, color: 'bg-indigo-500', href: '/dashboard/agents' },
     { label: 'Messages traités', value: messagesCount.toLocaleString(), sub: 'total', color: 'bg-purple-500', href: '/dashboard/conversations' },
     { label: 'Commandes', value: recentOrders.length, sub: `${pendingOrders} en attente`, color: 'bg-orange-500', href: '/dashboard/orders' },
   ]
@@ -33,7 +33,7 @@ export default async function DashboardPage() {
     <div className="p-6 max-w-6xl mx-auto">
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-800">Bonjour, {user.name || user.email.split('@')[0]} 👋</h1>
-        <p className="text-gray-500 text-sm mt-1">Voici l&apos;état de votre plateforme WazzapAI</p>
+        <p className="text-gray-500 text-sm mt-1">Voici l&apos;état de votre plateforme ChatFlow</p>
       </div>
 
       {/* Stats */}
@@ -53,9 +53,9 @@ export default async function DashboardPage() {
         <div className="bg-white rounded-2xl p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-bold text-gray-800">Solde Tokens</h2>
-            <Link href="/dashboard/tokens" className="text-[#25D366] text-sm font-medium hover:underline">Recharger</Link>
+            <Link href="/dashboard/tokens" className="text-indigo-600 text-sm font-medium hover:underline">Recharger</Link>
           </div>
-          <div className="text-4xl font-bold text-[#075E54] mb-1">
+          <div className="text-4xl font-bold text-indigo-700 mb-1">
             {(balance?.balance ?? 0).toLocaleString('fr-FR')}
           </div>
           <div className="text-gray-400 text-sm mb-4">tokens disponibles</div>
@@ -68,7 +68,7 @@ export default async function DashboardPage() {
               </div>
               <div className="mt-2 bg-gray-200 rounded-full h-2">
                 <div
-                  className="bg-[#25D366] h-2 rounded-full transition-all"
+                  className="bg-indigo-500 h-2 rounded-full transition-all"
                   style={{ width: `${Math.min(100, ((balance?.totalUsed ?? 0) / Math.max(1, balance?.totalBought ?? 1)) * 100)}%` }}
                 />
               </div>
@@ -86,7 +86,7 @@ export default async function DashboardPage() {
         <div className="bg-white rounded-2xl p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-bold text-gray-800">Commandes récentes</h2>
-            <Link href="/dashboard/orders" className="text-[#25D366] text-sm font-medium hover:underline">Voir tout</Link>
+            <Link href="/dashboard/orders" className="text-indigo-600 text-sm font-medium hover:underline">Voir tout</Link>
           </div>
           {recentOrders.length === 0 ? (
             <div className="text-center py-8 text-gray-400">
@@ -114,10 +114,10 @@ export default async function DashboardPage() {
 
       {/* Quick actions */}
       {agents.length === 0 && (
-        <div className="mt-6 bg-gradient-to-r from-[#075E54] to-[#128C7E] rounded-2xl p-6 text-white">
+        <div className="mt-6 bg-gradient-to-r from-indigo-800 to-indigo-700 rounded-2xl p-6 text-white">
           <h3 className="font-bold text-lg mb-2">Créez votre premier agent IA 🤖</h3>
           <p className="text-white/70 text-sm mb-4">En 5 minutes, connectez WhatsApp et automatisez votre service client.</p>
-          <Link href="/dashboard/agents" className="bg-[#25D366] text-white px-5 py-2.5 rounded-lg font-medium hover:bg-[#1da851] transition inline-block">
+          <Link href="/dashboard/agents" className="bg-indigo-500 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-[#1da851] transition inline-block">
             Créer un agent
           </Link>
         </div>
