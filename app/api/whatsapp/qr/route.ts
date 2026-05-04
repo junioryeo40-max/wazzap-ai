@@ -18,26 +18,33 @@ export async function GET(req: NextRequest) {
   const agent = await prisma.agent.findFirst({ where: { id: agentId, userId: user.id } })
   if (!agent) return NextResponse.json({ error: 'Agent introuvable' }, { status: 404 })
 
-  // Démarrer la session sur Railway
-  await fetch(`${BAILEYS_URL}/session/start`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-secret': SECRET },
-    body: JSON.stringify({ agentId })
-  })
+  const start = searchParams.get('start') === '1'
 
-  // Attendre puis récupérer le QR
-  await new Promise(r => setTimeout(r, 4000))
+  // Premier appel: démarrer la session
+  if (start) {
+    await fetch(`${BAILEYS_URL}/session/start`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-secret': SECRET },
+      body: JSON.stringify({ agentId })
+    }).catch(() => {})
 
-  const res = await fetch(`${BAILEYS_URL}/session/${agentId}/qr`, {
-    headers: { 'x-secret': SECRET }
-  })
-  const data = await res.json()
+    await prisma.whatsAppSession.upsert({
+      where: { agentId },
+      update: { status: 'CONNECTING' },
+      create: { agentId, status: 'CONNECTING' }
+    })
 
-  await prisma.whatsAppSession.upsert({
-    where: { agentId },
-    update: { status: data.status || 'QR_PENDING' },
-    create: { agentId, status: data.status || 'QR_PENDING' }
-  })
+    return NextResponse.json({ qr: null, status: 'CONNECTING' })
+  }
 
-  return NextResponse.json({ qr: data.qr, status: data.status })
+  // Appels suivants: récupérer le QR depuis Railway
+  try {
+    const res = await fetch(`${BAILEYS_URL}/session/${agentId}/qr`, {
+      headers: { 'x-secret': SECRET }
+    })
+    const data = await res.json()
+    return NextResponse.json({ qr: data.qr, status: data.status })
+  } catch {
+    return NextResponse.json({ qr: null, status: 'CONNECTING' })
+  }
 }

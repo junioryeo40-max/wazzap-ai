@@ -77,15 +77,42 @@ export default function AgentDetailPage() {
 
   async function loadQr() {
     setLoadingQr(true)
-    const res = await fetch(`/api/whatsapp/qr?agentId=${id}`)
-    const data = await res.json()
-    setQrCode(data.qr)
-    setLoadingQr(false)
+    setQrCode(null)
+
+    // Démarrer la session
+    await fetch(`/api/whatsapp/qr?agentId=${id}&start=1`)
+
+    // Poller toutes les 2 secondes jusqu'à obtenir le QR (max 30 secondes)
+    let attempts = 0
+    const poll = setInterval(async () => {
+      attempts++
+      const res = await fetch(`/api/whatsapp/qr?agentId=${id}`)
+      const data = await res.json()
+
+      if (data.status === 'CONNECTED') {
+        clearInterval(poll)
+        setLoadingQr(false)
+        fetchAgent()
+        return
+      }
+
+      if (data.qr) {
+        clearInterval(poll)
+        setQrCode(data.qr)
+        setLoadingQr(false)
+        return
+      }
+
+      if (attempts >= 15) {
+        clearInterval(poll)
+        setLoadingQr(false)
+      }
+    }, 2000)
   }
 
   if (!agent) return (
     <div className="flex justify-center items-center h-64">
-      <div className="w-8 h-8 border-4 border-[#25D366] border-t-transparent rounded-full animate-spin" />
+      <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
     </div>
   )
 
@@ -113,7 +140,7 @@ export default function AgentDetailPage() {
         {tabs.map(t => (
           <button key={t.id} onClick={() => setTab(t.id as typeof tab)}
             className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium whitespace-nowrap transition ${
-              tab === t.id ? 'bg-[#25D366] text-white' : 'text-gray-600 hover:bg-gray-100'
+              tab === t.id ? 'bg-indigo-600 text-white' : 'text-gray-600 hover:bg-gray-100'
             }`}>
             {t.label}
           </button>
@@ -137,14 +164,14 @@ export default function AgentDetailPage() {
                 <input
                   value={business[key as keyof typeof business] || ''}
                   onChange={e => setBusiness({ ...business, [key]: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#25D366] text-gray-800"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-600 text-gray-800"
                   placeholder={placeholder}
                 />
               </div>
             ))}
           </div>
           <button onClick={saveBusiness} disabled={saving}
-            className="mt-5 flex items-center gap-2 bg-[#25D366] text-white px-5 py-2.5 rounded-lg font-medium hover:bg-[#1da851] transition disabled:opacity-60">
+            className="mt-5 flex items-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-indigo-700 transition disabled:opacity-60">
             <Save size={16} />
             {saving ? 'Sauvegarde...' : 'Sauvegarder'}
           </button>
@@ -158,15 +185,15 @@ export default function AgentDetailPage() {
             <h2 className="font-bold text-gray-800 mb-4">Ajouter une FAQ</h2>
             <form onSubmit={addFaq} className="space-y-3">
               <input required value={newFaq.question} onChange={e => setNewFaq({ ...newFaq, question: e.target.value })}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#25D366] text-gray-800"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-600 text-gray-800"
                 placeholder="Question" />
               <textarea required value={newFaq.answer} onChange={e => setNewFaq({ ...newFaq, answer: e.target.value })}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#25D366] text-gray-800"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-600 text-gray-800"
                 placeholder="Réponse" rows={3} />
               <input value={newFaq.keywords} onChange={e => setNewFaq({ ...newFaq, keywords: e.target.value })}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#25D366] text-gray-800"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-600 text-gray-800"
                 placeholder="Mots-clés (séparés par virgule)" />
-              <button type="submit" className="flex items-center gap-2 bg-[#25D366] text-white px-5 py-2.5 rounded-lg font-medium hover:bg-[#1da851] transition">
+              <button type="submit" className="flex items-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-indigo-700 transition">
                 <Plus size={16} /> Ajouter
               </button>
             </form>
@@ -197,21 +224,21 @@ export default function AgentDetailPage() {
             <h2 className="font-bold text-gray-800 mb-4">Ajouter un produit</h2>
             <form onSubmit={addProduct} className="space-y-3">
               <input required value={newProduct.name} onChange={e => setNewProduct({ ...newProduct, name: e.target.value })}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#25D366] text-gray-800"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-600 text-gray-800"
                 placeholder="Nom du produit" />
               <div className="flex gap-3">
                 <input required type="number" value={newProduct.price} onChange={e => setNewProduct({ ...newProduct, price: e.target.value })}
-                  className="flex-1 border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#25D366] text-gray-800"
+                  className="flex-1 border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-600 text-gray-800"
                   placeholder="Prix" />
                 <select value={newProduct.currency} onChange={e => setNewProduct({ ...newProduct, currency: e.target.value })}
-                  className="w-28 border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#25D366] text-gray-800">
+                  className="w-28 border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-600 text-gray-800">
                   <option>XOF</option><option>XAF</option><option>MAD</option><option>TND</option><option>USD</option>
                 </select>
               </div>
               <input value={newProduct.description} onChange={e => setNewProduct({ ...newProduct, description: e.target.value })}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#25D366] text-gray-800"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-600 text-gray-800"
                 placeholder="Description (optionnel)" />
-              <button type="submit" className="flex items-center gap-2 bg-[#25D366] text-white px-5 py-2.5 rounded-lg font-medium hover:bg-[#1da851] transition">
+              <button type="submit" className="flex items-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-indigo-700 transition">
                 <Plus size={16} /> Ajouter
               </button>
             </form>
@@ -221,7 +248,7 @@ export default function AgentDetailPage() {
               <div key={p.id} className="bg-white rounded-2xl p-5 shadow-sm flex justify-between items-start">
                 <div>
                   <div className="font-medium text-gray-800">{p.name}</div>
-                  <div className="text-[#25D366] font-bold mt-1">{p.price.toLocaleString('fr-FR')} {p.currency}</div>
+                  <div className="text-indigo-600 font-bold mt-1">{p.price.toLocaleString('fr-FR')} {p.currency}</div>
                   {p.description && <div className="text-gray-500 text-xs mt-1">{p.description}</div>}
                 </div>
                 <button onClick={() => deleteProduct(p.id)} className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition">
@@ -270,7 +297,7 @@ export default function AgentDetailPage() {
             </div>
           ) : (
             <button onClick={loadQr} disabled={loadingQr}
-              className="w-full flex items-center justify-center gap-2 border-2 border-dashed border-gray-300 text-gray-500 py-8 rounded-xl hover:border-[#25D366] hover:text-[#25D366] transition disabled:opacity-60">
+              className="w-full flex items-center justify-center gap-2 border-2 border-dashed border-gray-300 text-gray-500 py-8 rounded-xl hover:border-indigo-600 hover:text-indigo-600 transition disabled:opacity-60">
               {loadingQr ? (
                 <><div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" /> Génération...</>
               ) : (
@@ -280,7 +307,7 @@ export default function AgentDetailPage() {
           )}
           {!qrCode && !loadingQr && (
             <button onClick={loadQr}
-              className="w-full mt-4 bg-[#25D366] text-white py-3 rounded-xl font-medium hover:bg-[#1da851] transition">
+              className="w-full mt-4 bg-indigo-600 text-white py-3 rounded-xl font-medium hover:bg-indigo-700 transition">
               Générer le QR code
             </button>
           )}
