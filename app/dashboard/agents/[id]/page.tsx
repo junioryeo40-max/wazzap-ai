@@ -17,8 +17,10 @@ export default function AgentDetailPage() {
   const [agent, setAgent] = useState<Agent | null>(null)
   const [tab, setTab] = useState<'info' | 'faq' | 'products' | 'whatsapp'>('info')
   const [saving, setSaving] = useState(false)
-  const [qrCode, setQrCode] = useState<string | null>(null)
+  const [phoneInput, setPhoneInput] = useState('')
+  const [pairingCode, setPairingCode] = useState<string | null>(null)
   const [loadingQr, setLoadingQr] = useState(false)
+  const [pairingStatus, setPairingStatus] = useState('')
   const [newFaq, setNewFaq] = useState({ question: '', answer: '', keywords: '' })
   const [newProduct, setNewProduct] = useState({ name: '', price: '', currency: 'XOF', description: '' })
   const [business, setBusiness] = useState({ name: '', description: '', address: '', hours: '', deliveryInfo: '' })
@@ -75,39 +77,47 @@ export default function AgentDetailPage() {
     fetchAgent()
   }
 
-  async function loadQr() {
+  async function connectWhatsApp(e: React.FormEvent) {
+    e.preventDefault()
+    if (!phoneInput.trim()) return
     setLoadingQr(true)
-    setQrCode(null)
+    setPairingCode(null)
+    setPairingStatus('Connexion en cours...')
 
-    // Démarrer la session
-    await fetch(`/api/whatsapp/qr?agentId=${id}&start=1`)
-
-    // Poller toutes les 2 secondes jusqu'à obtenir le QR (max 30 secondes)
-    let attempts = 0
-    const poll = setInterval(async () => {
-      attempts++
-      const res = await fetch(`/api/whatsapp/qr?agentId=${id}`)
+    try {
+      const res = await fetch('/api/whatsapp/qr', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ agentId: id, phoneNumber: phoneInput.replace(/\D/g, '') })
+      })
       const data = await res.json()
 
-      if (data.status === 'CONNECTED') {
-        clearInterval(poll)
-        setLoadingQr(false)
-        fetchAgent()
-        return
-      }
+      if (data.pairingCode) {
+        setPairingCode(data.pairingCode)
+        setPairingStatus('Entrez ce code dans WhatsApp → Appareils liés → Lier avec numéro')
 
-      if (data.qr) {
-        clearInterval(poll)
-        setQrCode(data.qr)
+        // Poller pour détecter la connexion
+        let attempts = 0
+        const poll = setInterval(async () => {
+          attempts++
+          const r = await fetch(`/api/whatsapp/qr?agentId=${id}`)
+          const d = await r.json()
+          if (d.status === 'CONNECTED') {
+            clearInterval(poll)
+            setPairingStatus('Connecté !')
+            setLoadingQr(false)
+            fetchAgent()
+          }
+          if (attempts >= 30) { clearInterval(poll); setLoadingQr(false) }
+        }, 3000)
+      } else {
+        setPairingStatus('Impossible de générer le code. Réessayez.')
         setLoadingQr(false)
-        return
       }
-
-      if (attempts >= 15) {
-        clearInterval(poll)
-        setLoadingQr(false)
-      }
-    }, 2000)
+    } catch {
+      setPairingStatus('Erreur de connexion.')
+      setLoadingQr(false)
+    }
   }
 
   if (!agent) return (
@@ -264,7 +274,7 @@ export default function AgentDetailPage() {
       {tab === 'whatsapp' && (
         <div className="bg-white rounded-2xl p-6 shadow-sm">
           <h2 className="font-bold text-gray-800 mb-2">Connexion WhatsApp</h2>
-          <p className="text-gray-500 text-sm mb-6">Scannez le QR code avec WhatsApp pour connecter ce numéro à l&apos;agent.</p>
+          <p className="text-gray-500 text-sm mb-6">Entrez votre numéro WhatsApp pour lier ce numéro à l&apos;agent.</p>
 
           <div className="flex items-center gap-3 mb-6 p-4 bg-gray-50 rounded-xl">
             {agent.session?.status === 'CONNECTED' ? (
@@ -280,36 +290,51 @@ export default function AgentDetailPage() {
                 <WifiOff size={20} className="text-gray-400" />
                 <div>
                   <div className="font-medium text-gray-800">Non connecté</div>
-                  <div className="text-sm text-gray-500">Générez un QR code pour vous connecter</div>
+                  <div className="text-sm text-gray-500">Entrez votre numéro pour vous connecter</div>
                 </div>
               </>
             )}
           </div>
 
-          {qrCode ? (
-            <div className="text-center">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={qrCode} alt="QR Code WhatsApp" width={256} height={256} className="mx-auto rounded-xl border-4 border-gray-100" />
-              <p className="text-gray-500 text-sm mt-4">Ouvrez WhatsApp → Appareils liés → Lier un appareil</p>
-              <button onClick={loadQr} className="mt-4 flex items-center gap-2 mx-auto text-gray-500 hover:text-gray-700 text-sm">
-                <RefreshCw size={14} /> Nouveau QR code
+          {agent.session?.status !== 'CONNECTED' && (
+            <form onSubmit={connectWhatsApp} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Numéro WhatsApp</label>
+                <input
+                  type="tel"
+                  value={phoneInput}
+                  onChange={e => setPhoneInput(e.target.value)}
+                  placeholder="Ex: 22501234567 (avec indicatif pays)"
+                  className="w-full border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-800"
+                  required
+                />
+                <p className="text-xs text-gray-400 mt-1">Incluez l&apos;indicatif pays sans le + (ex: 225 pour Côte d&apos;Ivoire)</p>
+              </div>
+              <button type="submit" disabled={loadingQr}
+                className="w-full bg-indigo-600 text-white py-3 rounded-xl font-medium hover:bg-indigo-700 transition disabled:opacity-60 flex items-center justify-center gap-2">
+                {loadingQr
+                  ? <><div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> En cours...</>
+                  : 'Connecter WhatsApp'}
               </button>
-            </div>
-          ) : (
-            <button onClick={loadQr} disabled={loadingQr}
-              className="w-full flex items-center justify-center gap-2 border-2 border-dashed border-gray-300 text-gray-500 py-8 rounded-xl hover:border-indigo-600 hover:text-indigo-600 transition disabled:opacity-60">
-              {loadingQr ? (
-                <><div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" /> Génération...</>
-              ) : (
-                <><div className="text-4xl mb-2">📱</div></>
-              )}
-            </button>
+            </form>
           )}
-          {!qrCode && !loadingQr && (
-            <button onClick={loadQr}
-              className="w-full mt-4 bg-indigo-600 text-white py-3 rounded-xl font-medium hover:bg-indigo-700 transition">
-              Générer le QR code
-            </button>
+
+          {pairingCode && (
+            <div className="mt-6 text-center">
+              <div className="bg-indigo-50 border-2 border-indigo-200 rounded-2xl p-6">
+                <div className="text-sm text-indigo-600 font-medium mb-2">Code de liaison WhatsApp</div>
+                <div className="text-4xl font-bold tracking-widest text-indigo-800 mb-4">{pairingCode}</div>
+                <div className="text-sm text-gray-600">
+                  WhatsApp → <strong>Paramètres</strong> → <strong>Appareils liés</strong> → <strong>Lier un appareil</strong> → <strong>Lier avec numéro de téléphone</strong>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {pairingStatus && (
+            <p className={`mt-4 text-sm text-center font-medium ${pairingStatus.includes('Connecté') ? 'text-green-600' : 'text-gray-500'}`}>
+              {pairingStatus}
+            </p>
           )}
         </div>
       )}
